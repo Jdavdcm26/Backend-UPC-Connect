@@ -54,7 +54,8 @@ arch()->preset()->php();
 
 arch()->preset()->security();
 
-arch()->preset()->laravel();
+// Los paneles de Filament siguen su propia convención: *PanelProvider.
+arch()->preset()->laravel()->ignoring('App\Providers\Filament');
 
 foreach ($modulos as $modulo) {
     arch("las capas internas de {$modulo} solo se usan dentro del módulo")
