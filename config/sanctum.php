@@ -20,10 +20,22 @@ return [
 
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s%s',
-        'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
+        'localhost,localhost:3000,localhost:5173,127.0.0.1,127.0.0.1:8000,::1',
         Sanctum::currentApplicationUrlWithPort(),
         // Sanctum::currentRequestHost(),
     ))),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Routes Prefix
+    |--------------------------------------------------------------------------
+    |
+    | The CSRF cookie route lives under /api so the SPA reaches every backend
+    | endpoint through the same path that the reverse proxy sends to Laravel.
+    |
+    */
+
+    'prefix' => 'api/sanctum',
 
     /*
     |--------------------------------------------------------------------------
