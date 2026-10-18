@@ -71,5 +71,8 @@ foreach ($modulos as $modulo) {
             ...$namespacesDelModulo($modulo, [...$capasPublicas, ...$capasInternas]),
             ...$clasesExtraDelModulo[$modulo] ?? [],
             'App\Providers',
+            // El panel de Filament es la capa de presentación de la administración,
+            // como los controladores lo son de la API.
+            'App\Filament',
         ]);
 }

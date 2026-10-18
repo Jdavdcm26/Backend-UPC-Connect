@@ -11,6 +11,9 @@ use App\Models\Scopes\UniversidadScope;
 use App\Notifications\Autenticacion\EnlaceRestablecerContrasena;
 use App\Notifications\Autenticacion\VerificarCorreo;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasName;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -33,7 +36,7 @@ use Illuminate\Notifications\Notifiable;
 #[ScopedBy(UniversidadScope::class)]
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements FilamentUser, HasName, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasUuids, Notifiable, SoftDeletes;
@@ -52,6 +55,19 @@ class User extends Authenticatable implements MustVerifyEmail
             'estado' => EstadoUsuario::class,
             'ultimo_acceso_en' => 'datetime',
         ];
+    }
+
+    /**
+     * Solo los administradores con cuenta activa entran al panel de Filament.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->rol === Rol::Admin && $this->estado === EstadoUsuario::Activo;
+    }
+
+    public function getFilamentName(): string
+    {
+        return $this->name ?? $this->email;
     }
 
     /**

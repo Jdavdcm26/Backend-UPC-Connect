@@ -2,7 +2,6 @@
 
 namespace App\Models\Perfiles;
 
-use App\Enums\Perfiles\NivelHabilidad;
 use App\Models\Catalogos\Carrera;
 use App\Models\Catalogos\Habilidad;
 use App\Models\User;
@@ -62,8 +61,8 @@ class Perfil extends Model
     public function habilidades(): BelongsToMany
     {
         return $this->belongsToMany(Habilidad::class, 'perfil_habilidad')
+            ->using(PerfilHabilidad::class)
             ->withPivot('nivel')
-            ->withCasts(['nivel' => NivelHabilidad::class])
             ->withTimestamps();
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Autenticacion\Rol;
 use App\Models\User;
 
 it('renders the admin panel login page', function () {
@@ -14,8 +15,19 @@ it('redirects guests to the admin panel login', function () {
         ->assertRedirect('/admin/login');
 });
 
-it('returns 403 to authenticated users outside local until admin roles exist', function () {
-    $this->actingAs(User::factory()->create())
+it('lets an active administrator into the panel', function () {
+    $this->actingAs(User::factory()->rol(Rol::Admin)->create())
+        ->get('/admin')
+        ->assertOk();
+});
+
+it('returns 403 to accounts that are not active administrators', function (Closure $usuario) {
+    $this->actingAs($usuario())
         ->get('/admin')
         ->assertForbidden();
-});
+})->with([
+    'estudiante' => [fn () => User::factory()->create()],
+    'empresa' => [fn () => User::factory()->rol(Rol::Empresa)->create()],
+    'moderador' => [fn () => User::factory()->rol(Rol::Moderador)->create()],
+    'administrador suspendido' => [fn () => User::factory()->rol(Rol::Admin)->suspendido()->create()],
+]);
