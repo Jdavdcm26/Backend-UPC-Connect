@@ -8,6 +8,7 @@ use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Foundation\DevCommands;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Password::defaults(fn (): Password => Password::min(10)->uncompromised());
+
         Gate::define('viewApiDocs', fn (?User $user): bool => ! $this->app->isProduction());
 
         $this->configureDevCommands();

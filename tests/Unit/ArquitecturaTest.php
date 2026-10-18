@@ -41,6 +41,7 @@ $capasInternas = [
     'Listeners',
     'Jobs',
     'Policies',
+    'Rules',
     'Notifications',
     'Mail',
 ];
@@ -57,11 +58,18 @@ arch()->preset()->security();
 // Los paneles de Filament siguen su propia convención: *PanelProvider.
 arch()->preset()->laravel()->ignoring('App\Providers\Filament');
 
+// El modelo User vive en App\Models por convención de Laravel, pero pertenece
+// al módulo de Autenticación (por ejemplo, envía su correo de verificación).
+$clasesExtraDelModulo = [
+    'Autenticacion' => ['App\Models\User'],
+];
+
 foreach ($modulos as $modulo) {
     arch("las capas internas de {$modulo} solo se usan dentro del módulo")
         ->expect($namespacesDelModulo($modulo, $capasInternas))
         ->toOnlyBeUsedIn([
             ...$namespacesDelModulo($modulo, [...$capasPublicas, ...$capasInternas]),
+            ...$clasesExtraDelModulo[$modulo] ?? [],
             'App\Providers',
         ]);
 }

@@ -6,7 +6,9 @@ use App\Enums\Autenticacion\EstadoUsuario;
 use App\Enums\Autenticacion\Rol;
 use App\Models\Autenticacion\Universidad;
 use App\Models\Scopes\UniversidadScope;
+use App\Notifications\Autenticacion\VerificarCorreo;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
@@ -26,7 +28,7 @@ use Illuminate\Notifications\Notifiable;
 #[ScopedBy(UniversidadScope::class)]
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasUuids, Notifiable, SoftDeletes;
@@ -45,6 +47,14 @@ class User extends Authenticatable
             'estado' => EstadoUsuario::class,
             'ultimo_acceso_en' => 'datetime',
         ];
+    }
+
+    /**
+     * Envía el correo de verificación en español por la cola "mail".
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerificarCorreo);
     }
 
     /**
