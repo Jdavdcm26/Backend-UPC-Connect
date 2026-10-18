@@ -4,11 +4,14 @@ namespace App\Providers;
 
 use App\Enums\Autenticacion\Rol;
 use App\Models\User;
+use App\Models\Vacantes\Vacante;
 use Dedoc\Scramble\SecurityDocumentation\MiddlewareAuthSecurityStrategy;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Foundation\DevCommands;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
@@ -37,6 +40,21 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewApiDocs', fn (?User $user): bool => ! $this->app->isProduction());
 
         $this->configureDevCommands();
+        $this->configurarBindings();
+    }
+
+    /**
+     * {vacantePropia} solo resuelve vacantes de la empresa con sesión. Una de
+     * otra empresa responde 404, igual que una inexistente, para no revelar
+     * que existe.
+     */
+    private function configurarBindings(): void
+    {
+        Route::bind('vacantePropia', function (string $id): Vacante {
+            abort_unless(Str::isUuid($id), 404);
+
+            return request()->user()?->empresa?->vacantes()->findOrFail($id) ?? abort(404);
+        });
     }
 
     /**

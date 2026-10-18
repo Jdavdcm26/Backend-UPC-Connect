@@ -9,6 +9,8 @@ use App\Http\Controllers\Autenticacion\VerificacionCorreoController;
 use App\Http\Controllers\Catalogos\CarreraController;
 use App\Http\Controllers\Catalogos\HabilidadController;
 use App\Http\Controllers\Perfiles\PerfilPropioController;
+use App\Http\Controllers\Vacantes\EmpresaVacanteController;
+use App\Http\Controllers\Vacantes\EstadoVacanteController;
 use App\Http\Middleware\AsegurarCuentaActiva;
 use Illuminate\Support\Facades\Route;
 
@@ -43,6 +45,15 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::middleware('can:es-candidato')->group(function () {
             Route::get('/me/perfil', [PerfilPropioController::class, 'show'])->name('me.perfil.show');
             Route::put('/me/perfil', [PerfilPropioController::class, 'update'])->name('me.perfil.update');
+        });
+
+        // Vacantes de la empresa con sesión: {vacantePropia} solo resuelve las suyas.
+        Route::middleware('can:es-empresa')->prefix('empresa')->name('empresa.')->group(function () {
+            Route::get('/vacantes', [EmpresaVacanteController::class, 'index'])->name('vacantes.index');
+            Route::post('/vacantes', [EmpresaVacanteController::class, 'store'])->name('vacantes.store');
+            Route::get('/vacantes/{vacantePropia}', [EmpresaVacanteController::class, 'show'])->name('vacantes.show');
+            Route::put('/vacantes/{vacantePropia}', [EmpresaVacanteController::class, 'update'])->name('vacantes.update');
+            Route::patch('/vacantes/{vacantePropia}/estado', EstadoVacanteController::class)->name('vacantes.estado');
         });
     });
 });
