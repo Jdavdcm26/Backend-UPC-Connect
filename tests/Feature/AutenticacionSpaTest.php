@@ -76,3 +76,10 @@ it('allows credentialed CORS requests only from the SPA origin', function (strin
     'origen de la SPA' => [ORIGEN_SPA, true],
     'origen desconocido' => ['https://sitio-ajeno.example', false],
 ]);
+
+it('returns 422 instead of failing when the login email is not a string', function () {
+    $this->withHeader('Origin', ORIGEN_SPA)
+        ->postJson('/api/v1/auth/login', ['email' => ['a@unicesar.edu.co'], 'password' => 'password'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('email');
+});
