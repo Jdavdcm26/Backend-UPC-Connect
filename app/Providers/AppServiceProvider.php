@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Vacantes\Vacante;
 use Dedoc\Scramble\SecurityDocumentation\MiddlewareAuthSecurityStrategy;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\DevCommands;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configureDevCommands();
         $this->configurarBindings();
+
+        // Fuera de producción, una relación sin cargar previamente lanza un
+        // error: así las consultas N+1 aparecen en desarrollo y en las pruebas.
+        Model::preventLazyLoading(! $this->app->isProduction());
     }
 
     /**

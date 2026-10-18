@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 /**
  * Vacante, práctica o pasantía de una empresa (HU-41 a HU-43).
@@ -27,6 +28,26 @@ class Vacante extends Model
 {
     /** @use HasFactory<VacanteFactory> */
     use HasFactory, HasUuids, SoftDeletes;
+
+    /**
+     * Minúsculas y sin tildes: así se guardan y se comparan el texto de
+     * búsqueda y la ciudad.
+     */
+    public static function normalizar(string $texto): string
+    {
+        return Str::lower(Str::ascii(trim($texto)));
+    }
+
+    /**
+     * Mantiene al día el texto de búsqueda y la ciudad normalizada.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (self $vacante): void {
+            $vacante->texto_busqueda = self::normalizar("{$vacante->titulo} {$vacante->descripcion} {$vacante->requisitos}");
+            $vacante->ciudad_normalizada = self::normalizar($vacante->ciudad);
+        });
+    }
 
     /**
      * Get the attributes that should be cast.
