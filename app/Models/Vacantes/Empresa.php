@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -67,5 +68,13 @@ class Empresa extends Model
     public function estaAprobada(): bool
     {
         return $this->estado_aprobacion === EstadoAprobacionEmpresa::Aprobada;
+    }
+
+    /**
+     * @return HasMany<Vacante, $this>
+     */
+    public function vacantes(): HasMany
+    {
+        return $this->hasMany(Vacante::class);
     }
 }
