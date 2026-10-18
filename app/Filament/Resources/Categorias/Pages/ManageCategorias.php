@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Categorias\Pages;
 
+use App\Filament\RegistroDeAuditoria;
 use App\Filament\Resources\Categorias\CategoriaResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRecords;
@@ -13,7 +14,7 @@ class ManageCategorias extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()->after(RegistroDeAuditoria::alCrear('categoria.creada')),
         ];
     }
 }

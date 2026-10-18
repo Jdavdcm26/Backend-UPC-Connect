@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Carreras\Pages;
 
+use App\Filament\RegistroDeAuditoria;
 use App\Filament\Resources\Carreras\CarreraResource;
 use App\Models\Catalogos\Carrera;
 use Filament\Actions\CreateAction;
@@ -15,7 +16,8 @@ class ManageCarreras extends ManageRecords
     {
         return [
             CreateAction::make()
-                ->using(fn (array $data): Carrera => auth()->user()->universidad->carreras()->create($data)),
+                ->using(fn (array $data): Carrera => auth()->user()->universidad->carreras()->create($data))
+                ->after(RegistroDeAuditoria::alCrear('carrera.creada')),
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Categorias;
 
+use App\Filament\RegistroDeAuditoria;
 use App\Filament\Resources\Categorias\Pages\ManageCategorias;
 use App\Models\Catalogos\Categoria;
 use BackedEnum;
@@ -62,7 +63,7 @@ class CategoriaResource extends Resource
                 TernaryFilter::make('activa'),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->after(RegistroDeAuditoria::alEditar('categoria.actualizada')),
             ]);
     }
 

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Carreras;
 
 use App\Enums\Catalogos\NivelCarrera;
+use App\Filament\RegistroDeAuditoria;
 use App\Filament\Resources\Carreras\Pages\ManageCarreras;
 use App\Models\Catalogos\Carrera;
 use BackedEnum;
@@ -84,7 +85,7 @@ class CarreraResource extends Resource
                 TernaryFilter::make('activa'),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->after(RegistroDeAuditoria::alEditar('carrera.actualizada')),
             ]);
     }
 

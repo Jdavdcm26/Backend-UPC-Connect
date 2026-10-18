@@ -6,6 +6,7 @@ use App\Enums\Catalogos\TipoHabilidad;
 use App\Filament\Resources\Carreras\Pages\ManageCarreras;
 use App\Filament\Resources\Categorias\Pages\ManageCategorias;
 use App\Filament\Resources\Habilidades\Pages\ManageHabilidades;
+use App\Models\Administracion\Auditoria;
 use App\Models\Autenticacion\Universidad;
 use App\Models\Catalogos\Carrera;
 use App\Models\Catalogos\Categoria;
@@ -17,7 +18,8 @@ use Livewire\Livewire;
 
 beforeEach(function () {
     $this->upc = Universidad::factory()->create();
-    $this->actingAs(User::factory()->for($this->upc)->rol(Rol::Admin)->create());
+    $this->admin = User::factory()->for($this->upc)->rol(Rol::Admin)->create();
+    $this->actingAs($this->admin);
 });
 
 describe('carreras', function () {
@@ -36,9 +38,14 @@ describe('carreras', function () {
             ->callAction('create', ['nombre' => 'Ingeniería Civil', 'facultad' => 'Ingenierías', 'nivel' => NivelCarrera::Pregrado->value, 'activa' => true])
             ->assertHasNoActionErrors();
 
-        expect(Carrera::query()->where('nombre', 'Ingeniería Civil')->sole())
+        $carrera = Carrera::query()->where('nombre', 'Ingeniería Civil')->sole();
+
+        expect($carrera)
             ->universidad_id->toBe($this->upc->id)
-            ->activa->toBeTrue();
+            ->activa->toBeTrue()
+            ->and(Auditoria::query()->where('accion', 'carrera.creada')->sole())
+            ->actor_id->toBe($this->admin->id)
+            ->entidad_id->toBe($carrera->id);
     });
 
     it('rejects a program name repeated within the university', function () {
@@ -56,7 +63,9 @@ describe('carreras', function () {
             ->callAction(TestAction::make('edit')->table($carrera), ['activa' => false])
             ->assertHasNoActionErrors();
 
-        expect($carrera->fresh()->activa)->toBeFalse();
+        expect($carrera->fresh()->activa)->toBeFalse()
+            ->and(Auditoria::query()->where('accion', 'carrera.actualizada')->sole()->detalle)
+            ->toBe(['cambios' => ['activa' => false]]);
     });
 
     it('does not offer deleting programs', function () {
@@ -89,7 +98,11 @@ describe('habilidades', function () {
             ->assertNotified();
 
         expect($perfil->habilidades()->pluck('habilidades.id')->all())->toBe([$destino->id])
-            ->and($origen->fresh()->activa)->toBeFalse();
+            ->and($origen->fresh()->activa)->toBeFalse()
+            ->and(Auditoria::query()->where('accion', 'habilidad.fusionada')->sole())
+            ->actor_id->toBe($this->admin->id)
+            ->entidad_id->toBe($origen->id)
+            ->detalle->toMatchArray(['destino_id' => $destino->id, 'perfiles' => 1]);
     });
 
     it('hides the merge action for an inactive skill', function () {
@@ -111,7 +124,9 @@ describe('categorías', function () {
             ->callAction(TestAction::make('edit')->table($categoria), ['activa' => false])
             ->assertHasNoActionErrors();
 
-        expect($categoria->fresh()->activa)->toBeFalse();
+        expect($categoria->fresh()->activa)->toBeFalse()
+            ->and(Auditoria::query()->where('entidad_id', $categoria->id)->pluck('accion')->all())
+            ->toEqualCanonicalizing(['categoria.creada', 'categoria.actualizada']);
     });
 });
 

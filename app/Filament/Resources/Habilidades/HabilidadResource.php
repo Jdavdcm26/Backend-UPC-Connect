@@ -4,7 +4,9 @@ namespace App\Filament\Resources\Habilidades;
 
 use App\Actions\Catalogos\FusionarHabilidades;
 use App\Enums\Catalogos\TipoHabilidad;
+use App\Filament\RegistroDeAuditoria;
 use App\Filament\Resources\Habilidades\Pages\ManageHabilidades;
+use App\Models\Administracion\Auditoria;
 use App\Models\Catalogos\Habilidad;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -80,7 +82,7 @@ class HabilidadResource extends Resource
                 TernaryFilter::make('activa'),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->after(RegistroDeAuditoria::alEditar('habilidad.actualizada')),
                 self::accionFusionar(),
             ]);
     }
@@ -115,6 +117,13 @@ class HabilidadResource extends Resource
                 $destino = Habilidad::query()->activas()->whereKeyNot($record->getKey())->findOrFail($data['destino_id']);
 
                 $perfiles = $fusionarHabilidades->handle($record, $destino);
+
+                Auditoria::registrar('habilidad.fusionada', $record, [
+                    'origen' => $record->nombre,
+                    'destino_id' => $destino->id,
+                    'destino' => $destino->nombre,
+                    'perfiles' => $perfiles,
+                ]);
 
                 Notification::make()
                     ->title("«{$record->nombre}» se fusionó en «{$destino->nombre}»")
