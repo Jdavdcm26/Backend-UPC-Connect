@@ -7,6 +7,8 @@ use Illuminate\Database\Seeder;
 
 class UniversidadSeeder extends Seeder
 {
+    public const string DOMINIO_UPC = 'unicesar.edu.co';
+
     /**
      * Registra la Universidad Popular del Cesar. Se puede correr varias veces
      * sin duplicarla.
@@ -14,7 +16,7 @@ class UniversidadSeeder extends Seeder
     public function run(): void
     {
         Universidad::query()->updateOrCreate(
-            ['dominio_correo' => 'unicesar.edu.co'],
+            ['dominio_correo' => self::DOMINIO_UPC],
             ['nombre' => 'Universidad Popular del Cesar', 'activa' => true],
         );
     }

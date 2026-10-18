@@ -2,6 +2,7 @@
 
 namespace App\Models\Autenticacion;
 
+use App\Models\Catalogos\Carrera;
 use App\Models\User;
 use Database\Factories\Autenticacion\UniversidadFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -36,5 +37,13 @@ class Universidad extends Model
     public function usuarios(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    /**
+     * @return HasMany<Carrera, $this>
+     */
+    public function carreras(): HasMany
+    {
+        return $this->hasMany(Carrera::class);
     }
 }

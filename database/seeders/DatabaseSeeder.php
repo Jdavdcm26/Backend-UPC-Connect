@@ -16,13 +16,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(UniversidadSeeder::class);
+        $this->call([
+            UniversidadSeeder::class,
+            CarreraSeeder::class,
+            HabilidadSeeder::class,
+            CategoriaSeeder::class,
+        ]);
 
-        User::factory()
-            ->for(Universidad::query()->where('dominio_correo', 'unicesar.edu.co')->sole())
-            ->create([
-                'name' => 'Usuario de prueba',
-                'email' => 'prueba@unicesar.edu.co',
-            ]);
+        if (User::query()->where('email', 'prueba@unicesar.edu.co')->doesntExist()) {
+            User::factory()
+                ->for(Universidad::query()->where('dominio_correo', UniversidadSeeder::DOMINIO_UPC)->sole())
+                ->create([
+                    'name' => 'Usuario de prueba',
+                    'email' => 'prueba@unicesar.edu.co',
+                ]);
+        }
     }
 }
