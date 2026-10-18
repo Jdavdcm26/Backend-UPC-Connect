@@ -8,6 +8,7 @@ use App\Http\Controllers\Autenticacion\UsuarioActualController;
 use App\Http\Controllers\Autenticacion\VerificacionCorreoController;
 use App\Http\Controllers\Catalogos\CarreraController;
 use App\Http\Controllers\Catalogos\HabilidadController;
+use App\Http\Controllers\Perfiles\HabilidadPerfilController;
 use App\Http\Controllers\Perfiles\PerfilController;
 use App\Http\Controllers\Perfiles\PerfilPropioController;
 use App\Http\Controllers\Postulaciones\EmpresaPostulacionController;
@@ -50,6 +51,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::middleware('can:es-candidato')->group(function () {
             Route::get('/me/perfil', [PerfilPropioController::class, 'show'])->name('me.perfil.show');
             Route::put('/me/perfil', [PerfilPropioController::class, 'update'])->name('me.perfil.update');
+            Route::post('/me/perfil/habilidades', [HabilidadPerfilController::class, 'store'])->name('me.perfil.habilidades.store');
+            Route::delete('/me/perfil/habilidades/{habilidad}', [HabilidadPerfilController::class, 'destroy'])->whereUuid('habilidad')->name('me.perfil.habilidades.destroy');
             Route::get('/me/postulaciones', [PostulacionController::class, 'index'])->name('me.postulaciones.index');
         });
 
