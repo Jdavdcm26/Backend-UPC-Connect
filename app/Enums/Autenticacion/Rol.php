@@ -12,4 +12,12 @@ enum Rol: string
     case Empresa = 'EMPRESA';
     case Moderador = 'MODERADOR';
     case Admin = 'ADMIN';
+
+    /**
+     * Estudiantes y egresados: tienen perfil y se postulan a vacantes.
+     */
+    public function esCandidato(): bool
+    {
+        return in_array($this, [self::Estudiante, self::Egresado], true);
+    }
 }

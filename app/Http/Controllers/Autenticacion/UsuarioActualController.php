@@ -13,6 +13,6 @@ class UsuarioActualController extends Controller
      */
     public function __invoke(Request $request): UsuarioActualResource
     {
-        return new UsuarioActualResource($request->user());
+        return new UsuarioActualResource($request->user()->loadMissing('universidad'));
     }
 }

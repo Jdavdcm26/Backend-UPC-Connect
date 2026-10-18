@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Enums\Autenticacion\Rol;
 use App\Models\User;
 use Dedoc\Scramble\SecurityDocumentation\MiddlewareAuthSecurityStrategy;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
@@ -28,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Password::defaults(fn (): Password => Password::min(10)->uncompromised());
+
+        Gate::define('es-admin', fn (User $user): bool => $user->rol === Rol::Admin);
+        Gate::define('es-empresa', fn (User $user): bool => $user->rol === Rol::Empresa);
+        Gate::define('es-candidato', fn (User $user): bool => $user->rol->esCandidato());
 
         Gate::define('viewApiDocs', fn (?User $user): bool => ! $this->app->isProduction());
 

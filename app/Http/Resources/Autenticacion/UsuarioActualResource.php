@@ -23,6 +23,12 @@ class UsuarioActualResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'email_verified_at' => $this->email_verified_at,
+            'rol' => $this->rol,
+            'estado' => $this->estado,
+            'universidad' => [
+                'id' => $this->universidad->id,
+                'nombre' => $this->universidad->nombre,
+            ],
         ];
     }
 }
