@@ -2,6 +2,7 @@
 
 use App\Enums\Autenticacion\Rol;
 use App\Models\User;
+use Filament\Facades\Filament;
 
 it('renders the admin panel login page', function () {
     $this->get('/admin/login')
@@ -20,6 +21,16 @@ it('requires an administrator without two-factor authentication to set it up fir
         ->get('/admin')
         ->assertRedirect('/admin/multi-factor-authentication/set-up');
 });
+
+it('requires two-factor authentication in every environment except local development', function (string $entorno, bool $obligatorio) {
+    $this->app['env'] = $entorno;
+
+    expect(Filament::getPanel('admin')->isMultiFactorAuthenticationRequired())->toBe($obligatorio);
+})->with([
+    'local' => ['local', false],
+    'staging' => ['staging', true],
+    'producción' => ['production', true],
+]);
 
 it('lets an active administrator with two-factor authentication into the panel', function () {
     $this->actingAs(User::factory()->rol(Rol::Admin)->conDobleFactor()->create())

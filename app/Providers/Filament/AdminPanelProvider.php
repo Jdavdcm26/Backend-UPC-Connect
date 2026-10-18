@@ -28,9 +28,11 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->brandName('UPC Connect')
             ->profile()
+            // Doble factor obligatorio en todo entorno salvo el desarrollo local,
+            // donde queda disponible pero opcional desde el perfil.
             ->multiFactorAuthentication([
                 AppAuthentication::make()->recoverable(),
-            ], isRequired: true)
+            ], isRequired: fn (): bool => ! app()->isLocal())
             ->colors([
                 'primary' => Color::Amber,
             ])
