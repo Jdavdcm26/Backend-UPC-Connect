@@ -139,3 +139,65 @@ describe('ya_postulado in the public vacancies', function () {
             ->assertJsonMissingPath('data.ya_postulado');
     });
 });
+
+describe('index', function () {
+    it('returns 401 without a session and 403 to companies', function () {
+        $this->getJson(route('api.v1.me.postulaciones.index'))->assertUnauthorized();
+
+        $this->actingAs(Empresa::factory()->create()->usuario)
+            ->getJson(route('api.v1.me.postulaciones.index'))
+            ->assertForbidden();
+    });
+
+    it('lists only the own applications, newest first, with vacancy, company, date and state', function () {
+        $antigua = Postulacion::factory()->de($this->candidato)->create(['created_at' => now()->subDay()]);
+        $reciente = Postulacion::factory()->de($this->candidato)->enEstado(EstadoPostulacion::Entrevista)->create();
+        Postulacion::factory()->create();
+
+        $this->actingAs($this->candidato)
+            ->getJson(route('api.v1.me.postulaciones.index'))
+            ->assertOk()
+            ->assertJsonPath('data.*.id', [$reciente->id, $antigua->id])
+            ->assertJsonPath('data.0.estado', 'ENTREVISTA')
+            ->assertJsonPath('data.0.vacante.titulo', $reciente->vacante->titulo)
+            ->assertJsonPath('data.0.vacante.empresa.razon_social', $reciente->vacante->empresa->razon_social)
+            ->assertJsonStructure(['data' => ['*' => ['creada_en', 'vacante' => ['abierta']]], 'meta' => ['next_cursor']]);
+    });
+
+    it('reflects the current state after the company changes it', function () {
+        $postulacion = Postulacion::factory()->de($this->candidato)->create();
+        $postulacion->forceFill(['estado' => EstadoPostulacion::Seleccionado])->save();
+
+        $this->actingAs($this->candidato)
+            ->getJson(route('api.v1.me.postulaciones.index'))
+            ->assertJsonPath('data.0.estado', 'SELECCIONADO');
+    });
+
+    it('paginates by cursor', function () {
+        Postulacion::factory()->de($this->candidato)->count(16)->create();
+
+        $primera = $this->actingAs($this->candidato)
+            ->getJson(route('api.v1.me.postulaciones.index'))
+            ->assertJsonCount(15, 'data');
+
+        $this->actingAs($this->candidato)
+            ->getJson(route('api.v1.me.postulaciones.index', ['cursor' => $primera->json('meta.next_cursor')]))
+            ->assertJsonCount(1, 'data');
+    });
+
+    it('loads the list with a constant number of queries', function () {
+        Postulacion::factory()->de($this->candidato)->count(3)->create();
+        $this->actingAs($this->candidato)->getJson(route('api.v1.me.postulaciones.index'));
+
+        DB::enableQueryLog();
+        $this->actingAs($this->candidato)->getJson(route('api.v1.me.postulaciones.index'))->assertJsonCount(3, 'data');
+        $consultasConTres = count(DB::getQueryLog());
+
+        Postulacion::factory()->de($this->candidato)->count(3)->create();
+
+        DB::flushQueryLog();
+        $this->actingAs($this->candidato)->getJson(route('api.v1.me.postulaciones.index'))->assertJsonCount(6, 'data');
+
+        expect(count(DB::getQueryLog()))->toBe($consultasConTres);
+    });
+});

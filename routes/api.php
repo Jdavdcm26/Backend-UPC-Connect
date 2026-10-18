@@ -47,6 +47,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::middleware('can:es-candidato')->group(function () {
             Route::get('/me/perfil', [PerfilPropioController::class, 'show'])->name('me.perfil.show');
             Route::put('/me/perfil', [PerfilPropioController::class, 'update'])->name('me.perfil.update');
+            Route::get('/me/postulaciones', [PostulacionController::class, 'index'])->name('me.postulaciones.index');
         });
 
         Route::get('/vacantes', [VacanteController::class, 'index'])->name('vacantes.index');
