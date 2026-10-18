@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Vacantes;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Vacantes\BuscarVacantesRequest;
 use App\Http\Resources\Vacantes\VacanteResource;
+use App\Models\User;
 use App\Models\Vacantes\Vacante;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
@@ -24,6 +27,7 @@ class VacanteController extends Controller
         $vacantes = Vacante::query()
             ->abiertas()
             ->with(['empresa', 'carreras'])
+            ->tap(fn ($consulta) => $this->marcarPostulaciones($consulta, $request->user()))
             ->when($filtros['q'] ?? null, fn ($consulta, string $texto) => $consulta->whereRaw(
                 "texto_busqueda like ? escape '\\'",
                 ['%'.addcslashes(Vacante::normalizar($texto), '\\%_').'%'],
@@ -47,10 +51,27 @@ class VacanteController extends Controller
      * Detalle de una vacante abierta. Una pausada, cerrada o vencida responde
      * 404: para el candidato ya no existe.
      */
-    public function show(string $vacante): VacanteResource
+    public function show(Request $request, string $vacante): VacanteResource
     {
-        $vacante = Vacante::query()->abiertas()->with(['empresa', 'carreras'])->findOrFail($vacante);
+        $vacante = Vacante::query()
+            ->abiertas()
+            ->with(['empresa', 'carreras'])
+            ->tap(fn ($consulta) => $this->marcarPostulaciones($consulta, $request->user()))
+            ->findOrFail($vacante);
 
         return new VacanteResource($vacante);
+    }
+
+    /**
+     * Para estudiantes y egresados agrega ya_postulado en la misma consulta,
+     * sin una consulta extra por vacante.
+     *
+     * @param  Builder<Vacante>  $consulta
+     */
+    private function marcarPostulaciones(Builder $consulta, User $usuario): void
+    {
+        if ($usuario->rol->esCandidato()) {
+            $consulta->withExists(['postulaciones as ya_postulado' => fn ($postulaciones) => $postulaciones->where('usuario_id', $usuario->id)]);
+        }
     }
 }

@@ -9,6 +9,7 @@ use App\Http\Controllers\Autenticacion\VerificacionCorreoController;
 use App\Http\Controllers\Catalogos\CarreraController;
 use App\Http\Controllers\Catalogos\HabilidadController;
 use App\Http\Controllers\Perfiles\PerfilPropioController;
+use App\Http\Controllers\Postulaciones\PostulacionController;
 use App\Http\Controllers\Vacantes\EmpresaVacanteController;
 use App\Http\Controllers\Vacantes\EstadoVacanteController;
 use App\Http\Controllers\Vacantes\VacanteController;
@@ -50,6 +51,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
         Route::get('/vacantes', [VacanteController::class, 'index'])->name('vacantes.index');
         Route::get('/vacantes/{vacante}', [VacanteController::class, 'show'])->whereUuid('vacante')->name('vacantes.show');
+        Route::post('/vacantes/{vacante}/postulaciones', [PostulacionController::class, 'store'])->whereUuid('vacante')->name('vacantes.postulaciones.store');
 
         // Vacantes de la empresa con sesión: {vacantePropia} solo resuelve las suyas.
         Route::middleware('can:es-empresa')->prefix('empresa')->name('empresa.')->group(function () {

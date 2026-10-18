@@ -30,6 +30,11 @@ class VacanteResource extends JsonResource
             'estado' => $this->estado,
             'abierta' => $this->estaAbierta(),
             'fecha_cierre' => $this->fecha_cierre->toDateString(),
+            // Solo en las vacantes públicas consultadas por estudiantes y egresados.
+            'ya_postulado' => $this->when(
+                array_key_exists('ya_postulado', $this->resource->getAttributes()),
+                fn (): bool => (bool) $this->ya_postulado,
+            ),
             'carreras' => $this->whenLoaded('carreras', fn () => $this->carreras->map(fn (Carrera $carrera): array => [
                 'id' => $carrera->id,
                 'nombre' => $carrera->nombre,
