@@ -6,6 +6,7 @@ use App\Enums\Vacantes\EstadoVacante;
 use App\Enums\Vacantes\ModalidadVacante;
 use App\Enums\Vacantes\TipoVacante;
 use App\Models\Catalogos\Carrera;
+use App\Models\Postulaciones\Postulacion;
 use Database\Factories\Vacantes\VacanteFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
@@ -96,5 +98,13 @@ class Vacante extends Model
     protected function abiertas(Builder $query): void
     {
         $query->where('estado', EstadoVacante::Activa)->whereDate('fecha_cierre', '>=', today());
+    }
+
+    /**
+     * @return HasMany<Postulacion, $this>
+     */
+    public function postulaciones(): HasMany
+    {
+        return $this->hasMany(Postulacion::class);
     }
 }

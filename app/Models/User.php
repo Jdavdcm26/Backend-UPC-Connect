@@ -7,6 +7,7 @@ use App\Enums\Autenticacion\Rol;
 use App\Models\Autenticacion\Consentimiento;
 use App\Models\Autenticacion\Universidad;
 use App\Models\Perfiles\Perfil;
+use App\Models\Postulaciones\Postulacion;
 use App\Models\Scopes\UniversidadScope;
 use App\Models\Vacantes\Empresa;
 use App\Notifications\Autenticacion\EnlaceRestablecerContrasena;
@@ -123,5 +124,13 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     public function empresa(): HasOne
     {
         return $this->hasOne(Empresa::class, 'usuario_id');
+    }
+
+    /**
+     * @return HasMany<Postulacion, $this>
+     */
+    public function postulaciones(): HasMany
+    {
+        return $this->hasMany(Postulacion::class, 'usuario_id');
     }
 }
