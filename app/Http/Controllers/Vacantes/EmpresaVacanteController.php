@@ -25,6 +25,7 @@ class EmpresaVacanteController extends Controller
 
         $vacantes = $request->user()->empresa->vacantes()
             ->with('carreras')
+            ->withCount('postulaciones as postulaciones_total')
             ->when($request->query('estado'), fn ($consulta, string $estado) => $consulta->where('estado', $estado))
             ->orderByDesc('created_at')
             ->orderByDesc('id')
@@ -42,7 +43,7 @@ class EmpresaVacanteController extends Controller
 
     public function show(Vacante $vacantePropia): VacanteResource
     {
-        return new VacanteResource($vacantePropia->load('carreras'));
+        return new VacanteResource($vacantePropia->load('carreras')->loadCount('postulaciones as postulaciones_total'));
     }
 
     public function update(GuardarVacanteRequest $request, Vacante $vacantePropia, GuardarVacante $guardarVacante): VacanteResource

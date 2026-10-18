@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Enums\Autenticacion\Rol;
+use App\Models\Postulaciones\Postulacion;
 use App\Models\User;
+use App\Models\Vacantes\Empresa;
 use App\Models\Vacantes\Vacante;
 use Dedoc\Scramble\SecurityDocumentation\MiddlewareAuthSecurityStrategy;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
@@ -49,17 +51,34 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * {vacantePropia} solo resuelve vacantes de la empresa con sesión. Una de
-     * otra empresa responde 404, igual que una inexistente, para no revelar
-     * que existe.
+     * {vacantePropia} y {postulacionPropia} solo resuelven registros de la
+     * empresa con sesión. Una cuenta que no es empresa recibe 403, como en el
+     * resto de sus rutas; un registro de otra empresa responde 404, igual que
+     * uno inexistente, para no revelar que existe.
      */
     private function configurarBindings(): void
     {
         Route::bind('vacantePropia', function (string $id): Vacante {
+            $empresa = $this->empresaConSesion();
             abort_unless(Str::isUuid($id), 404);
 
-            return request()->user()?->empresa?->vacantes()->findOrFail($id) ?? abort(404);
+            return $empresa->vacantes()->findOrFail($id);
         });
+
+        Route::bind('postulacionPropia', function (string $id): Postulacion {
+            $empresa = $this->empresaConSesion();
+            abort_unless(Str::isUuid($id), 404);
+
+            return Postulacion::query()
+                ->whereKey($id)
+                ->whereHas('vacante', fn ($vacantes) => $vacantes->where('empresa_id', $empresa->id))
+                ->firstOrFail();
+        });
+    }
+
+    private function empresaConSesion(): Empresa
+    {
+        return request()->user()?->empresa ?? abort(403, 'No tienes permiso para realizar esta acción.');
     }
 
     /**

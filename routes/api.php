@@ -9,6 +9,8 @@ use App\Http\Controllers\Autenticacion\VerificacionCorreoController;
 use App\Http\Controllers\Catalogos\CarreraController;
 use App\Http\Controllers\Catalogos\HabilidadController;
 use App\Http\Controllers\Perfiles\PerfilPropioController;
+use App\Http\Controllers\Postulaciones\EmpresaPostulacionController;
+use App\Http\Controllers\Postulaciones\EstadoPostulacionController;
 use App\Http\Controllers\Postulaciones\PostulacionController;
 use App\Http\Controllers\Vacantes\EmpresaVacanteController;
 use App\Http\Controllers\Vacantes\EstadoVacanteController;
@@ -54,13 +56,18 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/vacantes/{vacante}', [VacanteController::class, 'show'])->whereUuid('vacante')->name('vacantes.show');
         Route::post('/vacantes/{vacante}/postulaciones', [PostulacionController::class, 'store'])->whereUuid('vacante')->name('vacantes.postulaciones.store');
 
-        // Vacantes de la empresa con sesión: {vacantePropia} solo resuelve las suyas.
+        // Vacantes y postulaciones de la empresa con sesión: {vacantePropia} y
+        // {postulacionPropia} solo resuelven las suyas.
         Route::middleware('can:es-empresa')->prefix('empresa')->name('empresa.')->group(function () {
             Route::get('/vacantes', [EmpresaVacanteController::class, 'index'])->name('vacantes.index');
             Route::post('/vacantes', [EmpresaVacanteController::class, 'store'])->name('vacantes.store');
             Route::get('/vacantes/{vacantePropia}', [EmpresaVacanteController::class, 'show'])->name('vacantes.show');
             Route::put('/vacantes/{vacantePropia}', [EmpresaVacanteController::class, 'update'])->name('vacantes.update');
             Route::patch('/vacantes/{vacantePropia}/estado', EstadoVacanteController::class)->name('vacantes.estado');
+
+            Route::get('/vacantes/{vacantePropia}/postulaciones', [EmpresaPostulacionController::class, 'index'])->name('vacantes.postulaciones.index');
+            Route::get('/postulaciones/{postulacionPropia}', [EmpresaPostulacionController::class, 'show'])->name('postulaciones.show');
+            Route::patch('/postulaciones/{postulacionPropia}/estado', EstadoPostulacionController::class)->name('postulaciones.estado');
         });
     });
 });

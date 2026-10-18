@@ -28,10 +28,15 @@ function datosDeVacante(array $cambios = []): array
 }
 
 it('returns 401 without a session and 403 to accounts that are not companies', function () {
+    $vacante = Vacante::factory()->for($this->empresa)->create();
     $this->getJson(route('api.v1.empresa.vacantes.index'))->assertUnauthorized();
 
     $this->actingAs(User::factory()->create())
         ->getJson(route('api.v1.empresa.vacantes.index'))
+        ->assertForbidden();
+
+    $this->actingAs(User::factory()->create())
+        ->getJson(route('api.v1.empresa.vacantes.show', $vacante))
         ->assertForbidden();
 });
 
