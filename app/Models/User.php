@@ -6,6 +6,7 @@ use App\Enums\Autenticacion\EstadoUsuario;
 use App\Enums\Autenticacion\Rol;
 use App\Models\Autenticacion\Universidad;
 use App\Models\Scopes\UniversidadScope;
+use App\Notifications\Autenticacion\EnlaceRestablecerContrasena;
 use App\Notifications\Autenticacion\VerificarCorreo;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -55,6 +56,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendEmailVerificationNotification(): void
     {
         $this->notify(new VerificarCorreo);
+    }
+
+    /**
+     * Envía el enlace para restablecer la contraseña por la cola "mail".
+     *
+     * @param  string  $token
+     */
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
+    {
+        $this->notify(new EnlaceRestablecerContrasena($token));
     }
 
     /**

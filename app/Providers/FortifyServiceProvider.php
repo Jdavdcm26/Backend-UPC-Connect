@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Actions\Fortify\ResetUserPassword;
 use App\Enums\Autenticacion\EstadoUsuario;
 use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -25,11 +24,11 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
-
         $this->configurarInicioDeSesion();
 
         RateLimiter::for('registro', fn (Request $request): Limit => Limit::perMinute(5)->by($request->ip()));
+
+        RateLimiter::for('recuperacion', fn (Request $request): Limit => Limit::perMinute(5)->by($request->ip()));
 
         RateLimiter::for('reenvio-verificacion', fn (Request $request): array => [
             Limit::perMinute(3)->by(is_string($email = $request->input('email')) ? Str::lower(trim($email)) : ''),

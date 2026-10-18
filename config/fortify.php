@@ -143,8 +143,10 @@ return [
     */
 
     'features' => [
-        // Registro, verificación de correo y recuperación de contraseña se
-        // activan en BE-09 a BE-12, junto con sus reglas de negocio.
+        // Registro, verificación de correo y recuperación de contraseña viven
+        // en el módulo de Autenticación (App\Http\Controllers\Autenticacion)
+        // para dar respuestas que no revelen qué cuentas existen. Fortify solo
+        // atiende el inicio y el cierre de sesión.
     ],
 
 ];
