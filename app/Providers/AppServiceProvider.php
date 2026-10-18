@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\User;
 use Dedoc\Scramble\SecurityDocumentation\MiddlewareAuthSecurityStrategy;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
+use Illuminate\Foundation\DevCommands;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -26,5 +27,19 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::define('viewApiDocs', fn (?User $user): bool => ! $this->app->isProduction());
+
+        $this->configureDevCommands();
+    }
+
+    /**
+     * Procesos de `composer dev`: la cola atiende primero los correos y el
+     * programador corre las tareas como en producción. La API no sirve
+     * assets propios, así que Vite no se levanta.
+     */
+    private function configureDevCommands(): void
+    {
+        DevCommands::artisan('queue:listen --queue=mail,default --tries=1 --timeout=0', 'queue');
+        DevCommands::artisan('schedule:work', 'scheduler');
+        DevCommands::except('vite');
     }
 }
