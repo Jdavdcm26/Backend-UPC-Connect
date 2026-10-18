@@ -65,6 +65,23 @@ class Empresa extends Model
         return strlen($digitos) < 2 ? $digitos : substr($digitos, 0, -1).'-'.substr($digitos, -1);
     }
 
+    /**
+     * Dígito de verificación de un NIT según el algoritmo de la DIAN.
+     */
+    public static function digitoVerificacionNit(string $numero): int
+    {
+        $pesos = [3, 7, 13, 17, 19, 23, 29, 37, 41, 43, 47, 53, 59, 67, 71];
+        $suma = 0;
+
+        foreach (array_reverse(str_split($numero)) as $posicion => $digito) {
+            $suma += (int) $digito * $pesos[$posicion];
+        }
+
+        $residuo = $suma % 11;
+
+        return $residuo > 1 ? 11 - $residuo : $residuo;
+    }
+
     public function estaAprobada(): bool
     {
         return $this->estado_aprobacion === EstadoAprobacionEmpresa::Aprobada;
