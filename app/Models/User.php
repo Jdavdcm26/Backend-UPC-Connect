@@ -8,6 +8,7 @@ use App\Models\Autenticacion\Consentimiento;
 use App\Models\Autenticacion\Universidad;
 use App\Models\Perfiles\Perfil;
 use App\Models\Scopes\UniversidadScope;
+use App\Models\Vacantes\Empresa;
 use App\Notifications\Autenticacion\EnlaceRestablecerContrasena;
 use App\Notifications\Autenticacion\VerificarCorreo;
 use Database\Factories\UserFactory;
@@ -110,5 +111,13 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
     public function perfil(): HasOne
     {
         return $this->hasOne(Perfil::class, 'usuario_id');
+    }
+
+    /**
+     * @return HasOne<Empresa, $this>
+     */
+    public function empresa(): HasOne
+    {
+        return $this->hasOne(Empresa::class, 'usuario_id');
     }
 }

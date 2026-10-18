@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Autenticacion;
 
+use App\Enums\Autenticacion\Rol;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -26,6 +27,10 @@ class UsuarioActualResource extends JsonResource
             'rol' => $this->rol,
             'estado' => $this->estado,
             'tiene_perfil' => (bool) $this->perfil_exists,
+            // Solo aplica a cuentas de empresa: null para los demás roles.
+            'empresa_aprobada' => $this->rol === Rol::Empresa
+                ? (bool) $this->empresa?->estaAprobada()
+                : null,
             'universidad' => [
                 'id' => $this->universidad->id,
                 'nombre' => $this->universidad->nombre,
