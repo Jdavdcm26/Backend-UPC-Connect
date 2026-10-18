@@ -20,6 +20,7 @@ class RegistroController extends Controller
             $request->validated('email'),
             $request->validated('password'),
             $request->universidad(),
+            $request->validated('version_politica'),
         );
 
         return response()->json([

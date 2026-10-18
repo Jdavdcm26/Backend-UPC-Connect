@@ -2,6 +2,7 @@
 
 use App\Enums\Autenticacion\EstadoUsuario;
 use App\Enums\Autenticacion\Rol;
+use App\Models\Autenticacion\Consentimiento;
 use App\Models\Autenticacion\Universidad;
 use App\Models\User;
 use App\Notifications\Autenticacion\VerificarCorreo;
@@ -33,6 +34,8 @@ function datosDeRegistro(array $cambios = []): array
         'email' => 'nuevo@unicesar.edu.co',
         'password' => 'clave-segura-2026',
         'password_confirmation' => 'clave-segura-2026',
+        'acepta_politica' => true,
+        'version_politica' => '1.0',
         'captcha' => 'token-de-turnstile',
         ...$cambios,
     ];
@@ -79,7 +82,8 @@ it('returns the same response without creating or notifying when the email is al
         ->assertAccepted()
         ->assertExactJson(['message' => MENSAJE_REGISTRO]);
 
-    expect(User::query()->count())->toBe(1);
+    expect(User::query()->count())->toBe(1)
+        ->and(Consentimiento::query()->exists())->toBeFalse();
     Notification::assertNothingSentTo($existente);
     $this->assertGuest();
 });
@@ -159,8 +163,45 @@ it('returns the required-field errors when the payload is empty', function () {
         ->assertJsonValidationErrors([
             'email' => 'El campo correo electrónico es obligatorio.',
             'password' => 'El campo contraseña es obligatorio.',
+            'acepta_politica' => 'Debes aceptar la política de tratamiento de datos para crear tu cuenta.',
             'captcha' => 'El campo verificación de seguridad es obligatorio.',
         ]);
+});
+
+it('stores the accepted policy version, date and account as consent evidence', function () {
+    $this->freezeSecond();
+
+    $this->postJson(route('api.v1.auth.register'), datosDeRegistro())->assertAccepted();
+
+    $consentimiento = Consentimiento::query()->sole();
+
+    expect($consentimiento)
+        ->usuario_id->toBe(User::query()->where('email', 'nuevo@unicesar.edu.co')->sole()->id)
+        ->version_documento->toBe('1.0')
+        ->aceptado_en->toEqual(now());
+});
+
+it('rejects the registration with 422 when the policy is not accepted', function (array $cambios) {
+    $this->postJson(route('api.v1.auth.register'), datosDeRegistro($cambios))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors([
+            'acepta_politica' => 'Debes aceptar la política de tratamiento de datos para crear tu cuenta.',
+        ]);
+
+    expect(User::query()->exists())->toBeFalse();
+})->with([
+    'casilla sin marcar' => [['acepta_politica' => false]],
+    'casilla ausente' => [['acepta_politica' => null]],
+]);
+
+it('rejects the registration with 422 when the accepted policy version is outdated', function () {
+    $this->postJson(route('api.v1.auth.register'), datosDeRegistro(['version_politica' => '0.9']))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors([
+            'version_politica' => 'La política de tratamiento de datos cambió. Recarga la página, revísala y acéptala de nuevo.',
+        ]);
+
+    expect(User::query()->exists())->toBeFalse();
 });
 
 it('returns 429 after five registration attempts per minute from the same IP', function () {

@@ -8,6 +8,7 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class RegistrarUsuarioRequest extends FormRequest
@@ -48,7 +49,23 @@ class RegistrarUsuarioRequest extends FormRequest
                 },
             ],
             'password' => ['required', 'string', 'confirmed', Password::defaults()],
+            'acepta_politica' => ['accepted'],
+            'version_politica' => ['required', 'string', Rule::in([config('app.version_politica_datos')])],
             'captcha' => ['required', 'string', new CaptchaValido($this->ip())],
+        ];
+    }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'acepta_politica.accepted' => 'Debes aceptar la política de tratamiento de datos para crear tu cuenta.',
+            'version_politica.required' => 'Debes aceptar la política de tratamiento de datos para crear tu cuenta.',
+            'version_politica.in' => 'La política de tratamiento de datos cambió. Recarga la página, revísala y acéptala de nuevo.',
         ];
     }
 

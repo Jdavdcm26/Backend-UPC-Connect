@@ -68,6 +68,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Personal Data Policy Version
+    |--------------------------------------------------------------------------
+    |
+    | Version of the personal data processing policy (Ley 1581 de 2012) that
+    | users accept when they register (HU-07). Change it when the published
+    | policy changes.
+    |
+    */
+
+    'version_politica_datos' => '1.0',
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |
