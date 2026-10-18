@@ -53,6 +53,17 @@ class Empresa extends Model
         return $this->belongsTo(User::class, 'aprobada_por');
     }
 
+    /**
+     * Deja el NIT como "número-dígito", sin puntos ni espacios, para que dos
+     * formas de escribir el mismo NIT no pasen como empresas distintas.
+     */
+    public static function normalizarNit(string $nit): string
+    {
+        $digitos = preg_replace('/\D/', '', $nit);
+
+        return strlen($digitos) < 2 ? $digitos : substr($digitos, 0, -1).'-'.substr($digitos, -1);
+    }
+
     public function estaAprobada(): bool
     {
         return $this->estado_aprobacion === EstadoAprobacionEmpresa::Aprobada;

@@ -23,6 +23,14 @@ class UserPolicy
     }
 
     /**
+     * El administrador da de alta egresados (y, con EmpresaPolicy, empresas).
+     */
+    public function create(User $user): bool
+    {
+        return $user->rol === Rol::Admin;
+    }
+
+    /**
      * Nadie se suspende a sí mismo, para no quedar sin acceso al panel.
      */
     public function suspender(User $user, User $model): bool

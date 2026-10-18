@@ -99,6 +99,15 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+
+        // Invitaciones para definir la contraseña de las cuentas que crea el
+        // administrador (empresas y egresados): duran 7 días.
+        'invitaciones' => [
+            'provider' => 'users',
+            'table' => 'invitaciones_tokens',
+            'expire' => 60 * 24 * 7,
+            'throttle' => 60,
+        ],
     ],
 
     /*

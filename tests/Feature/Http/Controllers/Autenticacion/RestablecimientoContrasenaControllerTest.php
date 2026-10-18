@@ -101,3 +101,36 @@ it('closes other open sessions after the password changes', function () {
 
     $consultarMe()->assertUnauthorized();
 });
+
+it('accepts an invitation token for days after it was issued', function () {
+    $usuario = User::factory()->create();
+    $token = Password::broker('invitaciones')->createToken($usuario);
+
+    $this->travel(2)->days();
+
+    restablecer($usuario, $token)->assertOk();
+
+    expect(Hash::check(NUEVA_CONTRASENA, $usuario->fresh()->password))->toBeTrue();
+});
+
+it('rejects an invitation token after seven days', function () {
+    $usuario = User::factory()->create();
+    $token = Password::broker('invitaciones')->createToken($usuario);
+
+    $this->travel(7)->days();
+    $this->travel(1)->minutes();
+
+    restablecer($usuario, $token)
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('token');
+});
+
+it('invalidates the pending invitation once the password is defined', function () {
+    $usuario = User::factory()->create();
+    $invitacion = Password::broker('invitaciones')->createToken($usuario);
+
+    restablecer($usuario, Password::createToken($usuario))->assertOk();
+
+    restablecer($usuario, $invitacion, ['password' => 'otra-clave-segura-2026', 'password_confirmation' => 'otra-clave-segura-2026'])
+        ->assertUnprocessable();
+});
