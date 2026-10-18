@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Competencia del catálogo (técnica, blanda o idioma).
@@ -21,6 +22,19 @@ class Habilidad extends Model
 {
     /** @use HasFactory<HabilidadFactory> */
     use HasFactory, HasUuids;
+
+    public const string CLAVE_CACHE_ACTIVAS = 'catalogos:habilidades';
+
+    /**
+     * Invalida la caché del catálogo cuando una habilidad cambia.
+     */
+    protected static function booted(): void
+    {
+        $invalidar = fn () => Cache::forget(self::CLAVE_CACHE_ACTIVAS);
+
+        static::saved($invalidar);
+        static::deleted($invalidar);
+    }
 
     /**
      * Get the attributes that should be cast.

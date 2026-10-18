@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Programa académico oficial de una universidad.
@@ -26,6 +27,25 @@ class Carrera extends Model
 {
     /** @use HasFactory<CarreraFactory> */
     use HasFactory, HasUuids;
+
+    /**
+     * Clave de la caché con las carreras activas de una universidad.
+     */
+    public static function claveCacheActivas(string $universidadId): string
+    {
+        return "catalogos:carreras:{$universidadId}";
+    }
+
+    /**
+     * Invalida la caché del catálogo cuando una carrera cambia.
+     */
+    protected static function booted(): void
+    {
+        $invalidar = fn (self $carrera) => Cache::forget(self::claveCacheActivas($carrera->universidad_id));
+
+        static::saved($invalidar);
+        static::deleted($invalidar);
+    }
 
     /**
      * Get the attributes that should be cast.

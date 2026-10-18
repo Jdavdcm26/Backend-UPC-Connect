@@ -6,6 +6,8 @@ use App\Http\Controllers\Autenticacion\RestablecimientoContrasenaController;
 use App\Http\Controllers\Autenticacion\SolicitudRestablecimientoController;
 use App\Http\Controllers\Autenticacion\UsuarioActualController;
 use App\Http\Controllers\Autenticacion\VerificacionCorreoController;
+use App\Http\Controllers\Catalogos\CarreraController;
+use App\Http\Controllers\Catalogos\HabilidadController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('api.v1.')->group(function () {
@@ -32,5 +34,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', UsuarioActualController::class)->name('me');
+
+        Route::get('/carreras', [CarreraController::class, 'index'])->name('carreras.index');
+        Route::get('/habilidades', [HabilidadController::class, 'index'])->name('habilidades.index');
     });
 });
