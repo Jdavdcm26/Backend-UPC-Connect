@@ -29,9 +29,21 @@ it('rejects a login with a wrong password with 422', function () {
     $this->withHeader('Origin', ORIGEN_SPA)
         ->postJson('/api/v1/auth/login', ['email' => $user->email, 'password' => 'incorrecta'])
         ->assertUnprocessable()
-        ->assertJsonValidationErrors('email');
+        ->assertJsonValidationErrors([
+            'email' => 'El correo o la contraseña no son correctos. Revísalos e inténtalo de nuevo.',
+        ]);
 
     $this->assertGuest();
+});
+
+it('returns the required-field errors in Spanish when the login payload is empty', function () {
+    $this->withHeader('Origin', ORIGEN_SPA)
+        ->postJson('/api/v1/auth/login', [])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors([
+            'email' => 'El campo correo electrónico es obligatorio.',
+            'password' => 'El campo contraseña es obligatorio.',
+        ]);
 });
 
 it('ends the session on logout', function () {

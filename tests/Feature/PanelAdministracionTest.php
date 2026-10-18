@@ -5,7 +5,8 @@ use App\Models\User;
 it('renders the admin panel login page', function () {
     $this->get('/admin/login')
         ->assertOk()
-        ->assertSee('UPC Connect');
+        ->assertSee('UPC Connect')
+        ->assertSee('Entre a su cuenta');
 });
 
 it('redirects guests to the admin panel login', function () {
