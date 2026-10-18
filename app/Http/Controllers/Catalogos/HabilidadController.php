@@ -22,13 +22,19 @@ class HabilidadController extends Controller
      */
     public function index(BuscarHabilidadesRequest $request): AnonymousResourceCollection
     {
-        $habilidades = Cache::remember(
+        // La caché guarda solo arreglos: Laravel no reconstruye objetos al leerla
+        // (cache.serializable_classes), así que los modelos se rearman con hydrate().
+        $atributos = Cache::remember(
             Habilidad::CLAVE_CACHE_ACTIVAS,
             now()->addDay(),
-            fn () => Habilidad::query()->activas()->get()
+            fn (): array => Habilidad::query()->activas()->get()
                 ->sortBy(fn (Habilidad $habilidad): string => $this->normalizar($habilidad->nombre))
-                ->values(),
+                ->map(fn (Habilidad $habilidad): array => $habilidad->getAttributes())
+                ->values()
+                ->all(),
         );
+
+        $habilidades = Habilidad::hydrate($atributos);
 
         $busqueda = $this->normalizar((string) $request->validated('q'));
 

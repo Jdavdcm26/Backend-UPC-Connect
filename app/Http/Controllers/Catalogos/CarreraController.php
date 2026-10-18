@@ -21,14 +21,18 @@ class CarreraController extends Controller
     {
         $universidadId = $request->user()->universidad_id;
 
-        $carreras = Cache::remember(
+        // La caché guarda solo arreglos: Laravel no reconstruye objetos al leerla
+        // (cache.serializable_classes), así que los modelos se rearman con hydrate().
+        $atributos = Cache::remember(
             Carrera::claveCacheActivas($universidadId),
             now()->addDay(),
-            fn () => Carrera::query()->activas()->get()
+            fn (): array => Carrera::query()->activas()->get()
                 ->sortBy(fn (Carrera $carrera): string => Str::lower(Str::ascii("{$carrera->facultad}|{$carrera->nombre}")))
-                ->values(),
+                ->map(fn (Carrera $carrera): array => $carrera->getAttributes())
+                ->values()
+                ->all(),
         );
 
-        return CarreraResource::collection($carreras);
+        return CarreraResource::collection(Carrera::hydrate($atributos));
     }
 }
