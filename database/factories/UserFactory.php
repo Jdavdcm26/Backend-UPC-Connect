@@ -61,6 +61,17 @@ class UserFactory extends Factory
     }
 
     /**
+     * Indicate that the account already set up the panel's app-based
+     * two-factor authentication.
+     */
+    public function conDobleFactor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'app_authentication_secret' => 'JBSWY3DPEHPK3PXP',
+        ]);
+    }
+
+    /**
      * Indicate that the account is suspended.
      */
     public function suspendido(): static

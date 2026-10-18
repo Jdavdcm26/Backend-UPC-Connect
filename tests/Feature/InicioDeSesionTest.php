@@ -63,6 +63,7 @@ it('records the last access when the user logs in', function () {
 });
 
 it('locks the login with 429 after five consecutive failures and tells the waiting time', function () {
+    $this->freezeSecond();
     $usuario = User::factory()->create();
 
     foreach (range(1, 5) as $intento) {

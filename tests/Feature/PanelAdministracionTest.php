@@ -15,8 +15,14 @@ it('redirects guests to the admin panel login', function () {
         ->assertRedirect('/admin/login');
 });
 
-it('lets an active administrator into the panel', function () {
+it('requires an administrator without two-factor authentication to set it up first', function () {
     $this->actingAs(User::factory()->rol(Rol::Admin)->create())
+        ->get('/admin')
+        ->assertRedirect('/admin/multi-factor-authentication/set-up');
+});
+
+it('lets an active administrator with two-factor authentication into the panel', function () {
+    $this->actingAs(User::factory()->rol(Rol::Admin)->conDobleFactor()->create())
         ->get('/admin')
         ->assertOk();
 });
