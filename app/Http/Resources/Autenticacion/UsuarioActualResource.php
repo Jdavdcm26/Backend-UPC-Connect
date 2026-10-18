@@ -25,6 +25,7 @@ class UsuarioActualResource extends JsonResource
             'email_verified_at' => $this->email_verified_at,
             'rol' => $this->rol,
             'estado' => $this->estado,
+            'tiene_perfil' => (bool) $this->perfil_exists,
             'universidad' => [
                 'id' => $this->universidad->id,
                 'nombre' => $this->universidad->nombre,

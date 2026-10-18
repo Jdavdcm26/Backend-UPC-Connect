@@ -6,6 +6,7 @@ use App\Enums\Autenticacion\EstadoUsuario;
 use App\Enums\Autenticacion\Rol;
 use App\Models\Autenticacion\Consentimiento;
 use App\Models\Autenticacion\Universidad;
+use App\Models\Perfiles\Perfil;
 use App\Models\Scopes\UniversidadScope;
 use App\Notifications\Autenticacion\EnlaceRestablecerContrasena;
 use App\Notifications\Autenticacion\VerificarCorreo;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -84,5 +86,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function consentimientos(): HasMany
     {
         return $this->hasMany(Consentimiento::class, 'usuario_id');
+    }
+
+    /**
+     * @return HasOne<Perfil, $this>
+     */
+    public function perfil(): HasOne
+    {
+        return $this->hasOne(Perfil::class, 'usuario_id');
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\Autenticacion\UsuarioActualController;
 use App\Http\Controllers\Autenticacion\VerificacionCorreoController;
 use App\Http\Controllers\Catalogos\CarreraController;
 use App\Http\Controllers\Catalogos\HabilidadController;
+use App\Http\Controllers\Perfiles\PerfilPropioController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('api.v1.')->group(function () {
@@ -37,5 +38,10 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
         Route::get('/carreras', [CarreraController::class, 'index'])->name('carreras.index');
         Route::get('/habilidades', [HabilidadController::class, 'index'])->name('habilidades.index');
+
+        Route::middleware('can:es-candidato')->group(function () {
+            Route::get('/me/perfil', [PerfilPropioController::class, 'show'])->name('me.perfil.show');
+            Route::put('/me/perfil', [PerfilPropioController::class, 'update'])->name('me.perfil.update');
+        });
     });
 });
