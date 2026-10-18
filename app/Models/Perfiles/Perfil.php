@@ -24,6 +24,28 @@ class Perfil extends Model
     /** @use HasFactory<PerfilFactory> */
     use HasFactory, HasUuids;
 
+    public const string SECCION_BASICOS = 'basicos';
+
+    public const string SECCION_DESCRIPCION = 'descripcion';
+
+    public const string SECCION_HABILIDADES = 'habilidades';
+
+    /**
+     * Matriz de visibilidad por defecto del Release 1 (hallazgo 10, pendiente
+     * de ratificar con el docente tutor): quien puede ver el perfil ve todas
+     * las secciones, y el correo de la cuenta nunca se muestra. La
+     * configuración por sección (HU-16) llega en el Release 2.
+     */
+    public const array SECCIONES_POR_DEFECTO = [self::SECCION_BASICOS, self::SECCION_DESCRIPCION, self::SECCION_HABILIDADES];
+
+    /**
+     * @return list<string>
+     */
+    public function seccionesVisiblesPara(User $visitante): array
+    {
+        return $visitante->can('view', $this) ? self::SECCIONES_POR_DEFECTO : [];
+    }
+
     /**
      * Get the attributes that should be cast.
      *
