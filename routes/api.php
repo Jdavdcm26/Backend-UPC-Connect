@@ -8,6 +8,7 @@ use App\Http\Controllers\Autenticacion\UsuarioActualController;
 use App\Http\Controllers\Autenticacion\VerificacionCorreoController;
 use App\Http\Controllers\Catalogos\CarreraController;
 use App\Http\Controllers\Catalogos\HabilidadController;
+use App\Http\Controllers\Perfiles\PerfilController;
 use App\Http\Controllers\Perfiles\PerfilPropioController;
 use App\Http\Controllers\Postulaciones\EmpresaPostulacionController;
 use App\Http\Controllers\Postulaciones\EstadoPostulacionController;
@@ -51,6 +52,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::put('/me/perfil', [PerfilPropioController::class, 'update'])->name('me.perfil.update');
             Route::get('/me/postulaciones', [PostulacionController::class, 'index'])->name('me.postulaciones.index');
         });
+
+        Route::get('/perfiles/{slug}', [PerfilController::class, 'show'])->name('perfiles.show');
 
         Route::get('/vacantes', [VacanteController::class, 'index'])->name('vacantes.index');
         Route::get('/vacantes/{vacante}', [VacanteController::class, 'show'])->whereUuid('vacante')->name('vacantes.show');
