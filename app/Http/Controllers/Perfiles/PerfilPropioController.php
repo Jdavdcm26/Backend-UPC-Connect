@@ -6,6 +6,7 @@ use App\Actions\Perfiles\GuardarPerfil;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Perfiles\GuardarPerfilRequest;
 use App\Http\Resources\Perfiles\PerfilResource;
+use App\Models\Networking\Seguidor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -27,7 +28,12 @@ class PerfilPropioController extends Controller
             ], 404);
         }
 
-        return new PerfilResource($perfil->load(['carrera', 'habilidades']));
+        return (new PerfilResource($perfil->load(['carrera', 'habilidades'])))->additional([
+            'red' => [
+                'seguidores' => Seguidor::query()->where('seguido_id', $perfil->usuario_id)->count(),
+                'seguidos' => Seguidor::query()->where('seguidor_id', $perfil->usuario_id)->count(),
+            ],
+        ]);
     }
 
     /**

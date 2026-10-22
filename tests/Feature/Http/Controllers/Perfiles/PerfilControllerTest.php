@@ -60,3 +60,26 @@ it('returns 404 alike when the profile is not visible or does not exist', functi
     'estudiante de otra universidad' => [fn () => User::factory()->create(), 'ana-gomez'],
     'slug inexistente' => [fn () => User::factory()->create(), 'nadie'],
 ]);
+
+it('includes the follow counters and the relation with the visitor', function () {
+    $duena = $this->perfil->usuario;
+    $visitante = User::factory()->create(['universidad_id' => $this->universidadId]);
+    $otra = User::factory()->create(['universidad_id' => $this->universidadId]);
+    $visitante->seguidos()->attach($duena);
+    $otra->seguidos()->attach($duena);
+    $duena->seguidos()->attach($otra);
+
+    verPerfil($visitante)
+        ->assertOk()
+        ->assertJsonPath('red', [
+            'usuario_id' => $duena->id,
+            'seguidores' => 2,
+            'seguidos' => 1,
+            'lo_sigues' => true,
+            'lo_bloqueaste' => false,
+        ]);
+
+    $visitante->bloqueados()->attach($duena);
+
+    verPerfil($visitante)->assertJsonPath('red.lo_bloqueaste', true);
+});

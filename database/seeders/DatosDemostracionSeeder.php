@@ -26,7 +26,7 @@ use RuntimeException;
 /**
  * Datos de demostración para probar en local: un administrador, empresas,
  * candidatos con perfil, vacantes y postulaciones con historial repartidos
- * en los últimos tres meses. Todas las cuentas usan la contraseña "password".
+ * en los últimos tres meses, y publicaciones con comentarios y seguidores. Todas las cuentas usan la contraseña "password".
  *
  * Solo para desarrollo: php artisan db:seed --class=DatosDemostracionSeeder
  */
@@ -99,6 +99,7 @@ class DatosDemostracionSeeder extends Seeder
         $candidatos = $this->crearCandidatos($upc, $carreras, $habilidades, $faker, $hoy);
         $vacantes = $this->crearVacantes($empresas, $carreras, $faker, $hoy);
         $this->crearPostulaciones($candidatos, $vacantes, $faker, $hoy);
+        $this->call(PublicacionesDemostracionSeeder::class);
 
         $this->command?->info('Datos de demostración cargados. Contraseña de todas las cuentas: password');
     }

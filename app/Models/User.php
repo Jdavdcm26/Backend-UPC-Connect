@@ -6,8 +6,11 @@ use App\Enums\Autenticacion\EstadoUsuario;
 use App\Enums\Autenticacion\Rol;
 use App\Models\Autenticacion\Consentimiento;
 use App\Models\Autenticacion\Universidad;
+use App\Models\Networking\Bloqueo;
+use App\Models\Networking\Seguidor;
 use App\Models\Perfiles\Perfil;
 use App\Models\Postulaciones\Postulacion;
+use App\Models\Publicaciones\Publicacion;
 use App\Models\Scopes\UniversidadScope;
 use App\Models\Vacantes\Empresa;
 use App\Notifications\Autenticacion\EnlaceRestablecerContrasena;
@@ -27,6 +30,7 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -132,5 +136,49 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     public function postulaciones(): HasMany
     {
         return $this->hasMany(Postulacion::class, 'usuario_id');
+    }
+
+    /**
+     * @return HasMany<Publicacion, $this>
+     */
+    public function publicaciones(): HasMany
+    {
+        return $this->hasMany(Publicacion::class, 'autor_id');
+    }
+
+    /**
+     * Personas que este usuario sigue (HU-28).
+     *
+     * @return BelongsToMany<User, $this, Seguidor>
+     */
+    public function seguidos(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'seguidores', 'seguidor_id', 'seguido_id')
+            ->using(Seguidor::class)
+            ->withPivot('created_at');
+    }
+
+    /**
+     * Personas que siguen a este usuario (HU-28).
+     *
+     * @return BelongsToMany<User, $this, Seguidor>
+     */
+    public function seguidores(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'seguidores', 'seguido_id', 'seguidor_id')
+            ->using(Seguidor::class)
+            ->withPivot('created_at');
+    }
+
+    /**
+     * Personas que este usuario bloqueó (HU-31).
+     *
+     * @return BelongsToMany<User, $this, Bloqueo>
+     */
+    public function bloqueados(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'bloqueos', 'bloqueador_id', 'bloqueado_id')
+            ->using(Bloqueo::class)
+            ->withPivot('created_at');
     }
 }

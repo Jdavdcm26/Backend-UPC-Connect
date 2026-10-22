@@ -61,6 +61,15 @@ describe('show', function () {
             ->assertJsonPath('data.carrera.nombre', 'Ingeniería de Sistemas')
             ->assertJsonPath('data.habilidades', []);
     });
+
+    it('includes the own follow counters', function () {
+        Perfil::factory()->for($this->estudiante, 'usuario')->create(['carrera_id' => $this->carrera->id]);
+        User::factory()->for($this->upc)->create()->seguidos()->attach($this->estudiante);
+
+        $this->actingAs($this->estudiante)
+            ->getJson(route('api.v1.me.perfil.show'))
+            ->assertJsonPath('red', ['seguidores' => 1, 'seguidos' => 0]);
+    });
 });
 
 describe('update', function () {

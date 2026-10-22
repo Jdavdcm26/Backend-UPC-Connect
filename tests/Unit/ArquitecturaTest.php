@@ -24,6 +24,8 @@ $modulos = [
     'Postulaciones',
     'Administracion',
     'Analitica',
+    'Publicaciones',
+    'Networking',
 ];
 
 $capasPublicas = [
