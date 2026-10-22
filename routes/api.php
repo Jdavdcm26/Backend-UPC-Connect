@@ -7,6 +7,7 @@ use App\Http\Controllers\Autenticacion\SolicitudRestablecimientoController;
 use App\Http\Controllers\Autenticacion\UsuarioActualController;
 use App\Http\Controllers\Autenticacion\VerificacionCorreoController;
 use App\Http\Controllers\Catalogos\CarreraController;
+use App\Http\Controllers\Catalogos\CategoriaController;
 use App\Http\Controllers\Catalogos\HabilidadController;
 use App\Http\Controllers\Networking\BloqueoController;
 use App\Http\Controllers\Networking\SeguimientoController;
@@ -55,6 +56,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
         Route::get('/carreras', [CarreraController::class, 'index'])->name('carreras.index');
         Route::get('/habilidades', [HabilidadController::class, 'index'])->name('habilidades.index');
+        Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
 
         Route::middleware('can:es-candidato')->group(function () {
             Route::get('/me/perfil', [PerfilPropioController::class, 'show'])->name('me.perfil.show');
